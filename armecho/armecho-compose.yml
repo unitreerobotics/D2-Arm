@@ -1,0 +1,27 @@
+# D2 ArmEcho 上位机
+#   sha256sum -c d2arm-armecho-1.0.2.tar.sha256
+#   docker load -i d2arm-armecho-1.0.2.tar
+#   docker compose -f armecho-compose.yml up -d
+name: d2arm
+
+services:
+  armecho:
+    image: d2arm-armecho:1.0.2
+    restart: unless-stopped
+    ports:
+      # 主机 8000 被占用时改为 "18000:8000"，浏览器访问 18000。
+      - "8000:8000"
+    environment:
+      # 连接目标保存在卷内 config.json（页面：系统配置 → 网络配置）。
+      ARM_CONFIG_PATH: /data/config.json
+      # 连接目标以页面配置为准；仅需固定 UDP 端口时才取消注释：
+      # ARM_UDP_PORT: "2000"
+    volumes:
+      - d2arm-data:/data
+
+    # 机械臂要求与上位机同网段 / 广播可达时，改用 host 网络：
+    # network_mode: host
+
+# 命名卷只保存进程配置；示教 / 负载 / 设备配置在机械臂内部存储。
+volumes:
+  d2arm-data:
